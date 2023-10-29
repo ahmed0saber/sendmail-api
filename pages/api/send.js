@@ -9,16 +9,36 @@ const transporter = nodemailer.createTransport({
 })
 
 export default async (req, res) => {
-    const {to, subject, message} = JSON.parse(req.body)
-
-    await sendEmail(to, subject, message)
+    const { to, subject, message } = JSON.parse(req.body)
+    const validationErrors = getValidationErrors(to, subject, message)
 
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Methods', 'POST')
 
-    res.status(200).json({
+    if (Object.keys(validationErrors).length > 0) {
+        return res.status(400).json({ success: false, errors: validationErrors })
+    }
+
+    await sendEmail(to, subject, message)
+
+    return res.status(200).json({
         success: true
     })
+}
+
+const getValidationErrors = (to, subject, message) => {
+    const errors = {}
+    if (!/^\S+@\S+\.\S+$/.test(to)) {
+        errors.to = "Email address is not valid"
+    }
+    if (!/\S+/.test(subject)) {
+        errors.subject = "Subject cannot be empty"
+    }
+    if (!/\S+/.test(message)) {
+        errors.message = "Message cannot be empty"
+    }
+
+    return errors
 }
 
 const sendEmail = async (receiver, subject, message) => {
