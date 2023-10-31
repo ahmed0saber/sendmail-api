@@ -1,6 +1,7 @@
 {
   "index": "Introduction",
   "usage": "Usage",
+  "examples": "Examples",
   "about": {
     "title": "About",
     "type": "page"
